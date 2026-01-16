@@ -1,180 +1,271 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Miss You?</title>
-    <style>
-        :root{
-            --bg: #ffebee;
-            --bg-warm: #ffcdd2;
-            --red: #d32f2f;
-            --yes: #4caf50;
-            --no: #f44336;
-            --radius: 12px;
-            --transition: 0.2s ease;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Miss You?</title>
+  <style>
+    :root{
+      --bg: #ffebee;
+      --bg-warm: #ffcdd2;
+      --red: #d32f2f;
+      --yes: #4caf50;
+      --no: #f44336;
+      --radius: 12px;
+      --transition: 180ms ease;
+      --yes-scale: 1;
+      --no-scale: 1;
+      --max-yes-scale: 2.2;
+      --min-no-scale: 0.6;
+      --container-max-width: 720px;
+    }
 
-        html,body{height:100%}
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: var(--bg);
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-            -webkit-font-smoothing:antialiased;
-        }
+    html,body{height:100%}
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: var(--bg);
+      font-family: 'Arial', sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding: 24px;
+      box-sizing: border-box;
+    }
 
-        .container {
-            text-align: center;
-            padding: 20px;
-        }
+    main.container {
+      text-align: center;
+      padding: 20px;
+      width: 100%;
+      max-width: var(--container-max-width);
+      box-sizing: border-box;
+    }
 
-        .header-text {
-            font-size: 2.5rem;
-            color: var(--red);
-            margin-bottom: 30px;
-            transition: all 0.5s ease;
-        }
+    .header-text {
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      color: var(--red);
+      margin-bottom: 30px;
+      transition: font-size 300ms ease, color 300ms ease;
+    }
 
-        .buttons {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
 
-        button {
-            border-radius: var(--radius);
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition), font-size var(--transition), padding var(--transition);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        }
+    button {
+      appearance: none;
+      -webkit-appearance: none;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      padding: 12px 28px;
+      font-size: 1.1rem;
+      line-height: 1;
+      color: white;
+      min-width: 92px;
+      white-space: nowrap;
+      will-change: transform;
+      transform-origin: center center;
+    }
 
-        button:focus{
-            outline: 3px solid rgba(0,0,0,0.08);
-            transform: translateY(-2px);
-        }
+    button:focus {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.06), 0 6px 18px rgba(0,0,0,0.12);
+      transform: translateY(-2px) scale(1.02);
+    }
 
-        .yes-button {
-            background-color: var(--yes);
-            color: white;
-            padding: 15px 32px;
-            font-size: 1.2rem;
-        }
+    .yes-button {
+      background-color: var(--yes);
+      --scale: calc(var(--yes-scale));
+      transform: scale(var(--scale));
+    }
 
-        .no-button {
-            background-color: var(--no);
-            color: white;
-            padding: 15px 32px;
-            font-size: 1.2rem;
-        }
+    .no-button {
+      background-color: var(--no);
+      --scale-no: calc(var(--no-scale));
+      transform: scale(var(--scale-no));
+    }
 
-        /* คลาสสำหรับซ่อนปุ่มเมื่อกด Yes */
-        .hidden {
-            display: none;
-        }
-    </style>
+    /* keyboard focus toggle class used by Arrow keys */
+    .focused {
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.15), 0 6px 18px rgba(0,0,0,0.12);
+    }
+
+    /* hidden but still accessible for screen readers before aria-hidden is set */
+    .visually-hidden {
+      position: absolute !important;
+      height: 1px; width: 1px;
+      overflow: hidden;
+      clip: rect(1px, 1px, 1px, 1px);
+      white-space: nowrap;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      button, .header-text {
+        transition: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1 id="question" class="header-text">คิดถึงกันไหม?</h1>
-        <div id="button-group" class="buttons">
-            <button id="yesBtn" class="yes-button" aria-label="ตอบใช่" onclick="handleYesClick()">Yes</button>
-            <button id="noBtn" class="no-button" aria-label="ตอบไม่" onclick="handleNoClick()">No</button>
-        </div>
+  <main class="container" role="main">
+    <h1 id="question" class="header-text" aria-live="polite">คิดถึงกันไหม?</h1>
+
+    <div id="button-group" class="buttons" role="group" aria-label="ตอบใช่หรือตอบไม่">
+      <button id="yesBtn" class="yes-button" type="button" aria-label="ตอบใช่">ใช่</button>
+      <button id="noBtn" class="no-button" type="button" aria-label="ตอบไม่">ไม่</button>
     </div>
+  </main>
 
-    <script>
-        let messageIndex = 0;
-        const messages = [
-            "No",
-            "Are you sure?",
-            "Really??",
-            "Think again!",
-            "Last chance...",
-            "Don't do this to me :("
-        ];
+  <script>
+    (function () {
+      // Messages (Thai). Replace with English if you prefer bilingual.
+      const messages = [
+        "ไม่",
+        "แน่ใจนะ?",
+        "จริงเหรอ??",
+        "คิดอีกที!",
+        "โอกาสสุดท้าย...",
+        "อย่าทำแบบนี้เลย :("
+      ];
 
-        // กำหนดขีดจำกัดเพื่อไม่ให้ Yes โตเกินไป
-        const YES_FONT_MAX = 48; // px
-        const YES_PADDING_MAX = 48; // px (แต่ละแกน)
+      let messageIndex = 0;
 
-        function px(val){ return parseFloat(val || 0); }
+      // scale control
+      const YES_SCALE_STEP = 1.12; // multiplier per "no" click
+      const NO_SCALE_STEP = 0.88;  // multiplier per "no" click (shrinks)
+      const MAX_YES_SCALE = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--max-yes-scale')) || 2.2;
+      const MIN_NO_SCALE = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--min-no-scale')) || 0.6;
 
-        function handleNoClick() {
-            const noButton = document.getElementById("noBtn");
-            const yesButton = document.getElementById("yesBtn");
+      const yesBtn = document.getElementById('yesBtn');
+      const noBtn = document.getElementById('noBtn');
+      const questionEl = document.getElementById('question');
+      const buttonGroup = document.getElementById('button-group');
 
-            // 1. เปลี่ยนข้อความปุ่ม No
-            noButton.textContent = messages[messageIndex];
-            messageIndex = (messageIndex + 1) % messages.length;
+      // initialize CSS custom properties
+      function setYesScale(scale) {
+        const clamped = Math.min(MAX_YES_SCALE, scale);
+        document.documentElement.style.setProperty('--yes-scale', clamped);
+      }
+      function setNoScale(scale) {
+        const clamped = Math.max(MIN_NO_SCALE, scale);
+        document.documentElement.style.setProperty('--no-scale', clamped);
+      }
 
-            // 2. ขยายขนาดปุ่ม Yes (คำนวนจาก padding-top/left แยกแกน)
-            const yesStyle = window.getComputedStyle(yesButton);
-            const yesFontPx = px(yesStyle.fontSize);
-            const yesPadTop = px(yesStyle.paddingTop);
-            const yesPadLeft = px(yesStyle.paddingLeft);
+      // starting scales
+      let currentYesScale = 1;
+      let currentNoScale = 1;
+      setYesScale(currentYesScale);
+      setNoScale(currentNoScale);
 
-            // ขยายแบบค่อยเป็นค่อยไป (ไม่ทำให้ใหญ่เกิน)
-            const newYesFont = Math.min(YES_FONT_MAX, yesFontPx * 1.15);
-            const newYesPadTop = Math.min(YES_PADDING_MAX, yesPadTop * 1.12);
-            const newYesPadLeft = Math.min(YES_PADDING_MAX, yesPadLeft * 1.12);
+      // handle "No" clicks: cycle message, scale yes up, scale no down
+      function handleNoClick(e) {
+        // update message on the NO button
+        noBtn.textContent = messages[messageIndex];
+        messageIndex = (messageIndex + 1) % messages.length;
 
-            yesButton.style.fontSize = `${newYesFont}px`;
-            yesButton.style.padding = `${newYesPadTop}px ${newYesPadLeft}px`;
+        // grow YES by multiplier, capped
+        currentYesScale = Math.min(MAX_YES_SCALE, currentYesScale * YES_SCALE_STEP);
+        setYesScale(currentYesScale);
 
-            // 3. ลดขนาดปุ่ม No (คำนวนจาก padding-top/left) — ลดแบบค่อยเป็นค่อยไปแต่ไม่เล็กจนอ่านไม่ออก
-            const noStyle = window.getComputedStyle(noButton);
-            const noFontPx = px(noStyle.fontSize);
-            const noPadTop = px(noStyle.paddingTop);
-            const noPadLeft = px(noStyle.paddingLeft);
+        // shrink NO (but not unreadable)
+        currentNoScale = Math.max(MIN_NO_SCALE, currentNoScale * NO_SCALE_STEP);
+        setNoScale(currentNoScale);
 
-            const MIN_NO_FONT = 10; // px
-            if (noFontPx > MIN_NO_FONT) {
-                const newNoFont = Math.max(MIN_NO_FONT, noFontPx * 0.9);
-                const newNoPadTop = Math.max(4, noPadTop * 0.9);
-                const newNoPadLeft = Math.max(8, noPadLeft * 0.9);
+        // ensure focus stays visible (move focus to no button so keyboard users continue)
+        noBtn.focus({ preventScroll: true });
+      }
 
-                noButton.style.fontSize = `${newNoFont}px`;
-                noButton.style.padding = `${newNoPadTop}px ${newNoPadLeft}px`;
-            }
+      function handleYesClick(e) {
+        // update the question text
+        questionEl.textContent = "คิดถึงเหมือนกัน ❤️";
+        questionEl.style.fontSize = "clamp(2.5rem, 6vw, 4rem)";
+
+        // hide button group from visual and accessibility tree
+        buttonGroup.classList.add('hidden');
+        buttonGroup.setAttribute('aria-hidden', 'true');
+
+        // warm background
+        document.body.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-warm') || '#ffcdd2';
+
+        // shift focus to the heading so screen reader users get the updated message
+        questionEl.setAttribute('tabindex', '-1');
+        questionEl.focus({ preventScroll: true });
+      }
+
+      // keyboard support
+      function onKeyDown(e) {
+        if (!yesBtn || !noBtn) return;
+
+        // Space or Enter -> Yes
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          // Prevent page from scrolling on Space if focused on body
+          e.preventDefault();
+          yesBtn.click();
+          return;
         }
 
-        function handleYesClick() {
-            // เปลี่ยนข้อความคำถามเป็นคำตอบ
-            const questionText = document.getElementById("question");
-            questionText.textContent = "คิดถึงเหมือนกัน ❤️";
-            questionText.style.fontSize = "4rem"; // ขยายขนาดข้อความคำตอบให้เด่นๆ
+        // Arrow keys toggle visual focus between buttons
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          // toggle .focused class to give a clear visible state
+          yesBtn.classList.toggle('focused');
+          noBtn.classList.toggle('focused');
 
-            // ซ่อนปุ่มทั้งหมด
-            const buttonGroup = document.getElementById("button-group");
-            buttonGroup.classList.add("hidden");
-
-            // เปลี่ยนสีพื้นหลังเล็กน้อยให้ดูอบอุ่นขึ้น
-            document.body.style.backgroundColor = "#ffcdd2";
+          // move logical focus for keyboard users
+          if (document.activeElement === yesBtn) {
+            noBtn.focus({ preventScroll: true });
+          } else {
+            yesBtn.focus({ preventScroll: true });
+          }
         }
+      }
 
-        // คีย์บอร์ดสนับสนุน: Enter = Yes, ArrowLeft/ArrowRight สลับปุ่ม
-        document.addEventListener('keydown', (e) => {
-            const yes = document.getElementById('yesBtn');
-            const no = document.getElementById('noBtn');
-            if (!yes || !no) return;
-            if (e.key === 'Enter') {
-                yes.click();
-            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                // สร้างเอฟเฟกต์เล็กๆ แทนการ hover
-                yes.classList.toggle('focused');
-                no.classList.toggle('focused');
-            }
+      // attach listeners
+      noBtn.addEventListener('click', handleNoClick);
+      yesBtn.addEventListener('click', handleYesClick);
+      document.addEventListener('keydown', onKeyDown);
+
+      // Ensure the Space key works when a button is focused (some browsers already map Space to click)
+      [yesBtn, noBtn].forEach(btn => {
+        btn.addEventListener('keyup', (ev) => {
+          if (ev.key === ' ' || ev.key === 'Spacebar') {
+            // prevent double-activation in browsers that map Space to both keyup and click
+            // we'll ignore here because Enter/Space handled globally.
+          }
         });
-    </script>
+      });
+
+      // Optional: keep things tidy on resize (prevent huge scaling on very small screens)
+      window.addEventListener('resize', () => {
+        // cap yes scale further on tiny screens if needed
+        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        if (vw < 420 && currentYesScale > 1.6) {
+          currentYesScale = Math.min(currentYesScale, 1.6);
+          setYesScale(currentYesScale);
+        }
+      });
+
+      // Expose for debugging (optional)
+      window.__demoControls = {
+        setYesScale,
+        setNoScale
+      };
+    })();
+  </script>
 
 </body>
 </html>
