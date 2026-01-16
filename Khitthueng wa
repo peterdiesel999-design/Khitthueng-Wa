@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Miss You?</title>
+    <style>
+        :root{
+            --bg: #ffebee;
+            --bg-warm: #ffcdd2;
+            --red: #d32f2f;
+            --yes: #4caf50;
+            --no: #f44336;
+            --radius: 12px;
+            --transition: 0.2s ease;
+        }
+
+        html,body{height:100%}
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: var(--bg);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            -webkit-font-smoothing:antialiased;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .header-text {
+            font-size: 2.5rem;
+            color: var(--red);
+            margin-bottom: 30px;
+            transition: all 0.5s ease;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        button {
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition), font-size var(--transition), padding var(--transition);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        button:focus{
+            outline: 3px solid rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .yes-button {
+            background-color: var(--yes);
+            color: white;
+            padding: 15px 32px;
+            font-size: 1.2rem;
+        }
+
+        .no-button {
+            background-color: var(--no);
+            color: white;
+            padding: 15px 32px;
+            font-size: 1.2rem;
+        }
+
+        /* คลาสสำหรับซ่อนปุ่มเมื่อกด Yes */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 id="question" class="header-text">คิดถึงกันไหม?</h1>
+        <div id="button-group" class="buttons">
+            <button id="yesBtn" class="yes-button" aria-label="ตอบใช่" onclick="handleYesClick()">Yes</button>
+            <button id="noBtn" class="no-button" aria-label="ตอบไม่" onclick="handleNoClick()">No</button>
+        </div>
+    </div>
+
+    <script>
+        let messageIndex = 0;
+        const messages = [
+            "No",
+            "Are you sure?",
+            "Really??",
+            "Think again!",
+            "Last chance...",
+            "Don't do this to me :("
+        ];
+
+        // กำหนดขีดจำกัดเพื่อไม่ให้ Yes โตเกินไป
+        const YES_FONT_MAX = 48; // px
+        const YES_PADDING_MAX = 48; // px (แต่ละแกน)
+
+        function px(val){ return parseFloat(val || 0); }
+
+        function handleNoClick() {
+            const noButton = document.getElementById("noBtn");
+            const yesButton = document.getElementById("yesBtn");
+
+            // 1. เปลี่ยนข้อความปุ่ม No
+            noButton.textContent = messages[messageIndex];
+            messageIndex = (messageIndex + 1) % messages.length;
+
+            // 2. ขยายขนาดปุ่ม Yes (คำนวนจาก padding-top/left แยกแกน)
+            const yesStyle = window.getComputedStyle(yesButton);
+            const yesFontPx = px(yesStyle.fontSize);
+            const yesPadTop = px(yesStyle.paddingTop);
+            const yesPadLeft = px(yesStyle.paddingLeft);
+
+            // ขยายแบบค่อยเป็นค่อยไป (ไม่ทำให้ใหญ่เกิน)
+            const newYesFont = Math.min(YES_FONT_MAX, yesFontPx * 1.15);
+            const newYesPadTop = Math.min(YES_PADDING_MAX, yesPadTop * 1.12);
+            const newYesPadLeft = Math.min(YES_PADDING_MAX, yesPadLeft * 1.12);
+
+            yesButton.style.fontSize = `${newYesFont}px`;
+            yesButton.style.padding = `${newYesPadTop}px ${newYesPadLeft}px`;
+
+            // 3. ลดขนาดปุ่ม No (คำนวนจาก padding-top/left) — ลดแบบค่อยเป็นค่อยไปแต่ไม่เล็กจนอ่านไม่ออก
+            const noStyle = window.getComputedStyle(noButton);
+            const noFontPx = px(noStyle.fontSize);
+            const noPadTop = px(noStyle.paddingTop);
+            const noPadLeft = px(noStyle.paddingLeft);
+
+            const MIN_NO_FONT = 10; // px
+            if (noFontPx > MIN_NO_FONT) {
+                const newNoFont = Math.max(MIN_NO_FONT, noFontPx * 0.9);
+                const newNoPadTop = Math.max(4, noPadTop * 0.9);
+                const newNoPadLeft = Math.max(8, noPadLeft * 0.9);
+
+                noButton.style.fontSize = `${newNoFont}px`;
+                noButton.style.padding = `${newNoPadTop}px ${newNoPadLeft}px`;
+            }
+        }
+
+        function handleYesClick() {
+            // เปลี่ยนข้อความคำถามเป็นคำตอบ
+            const questionText = document.getElementById("question");
+            questionText.textContent = "คิดถึงเหมือนกัน ❤️";
+            questionText.style.fontSize = "4rem"; // ขยายขนาดข้อความคำตอบให้เด่นๆ
+
+            // ซ่อนปุ่มทั้งหมด
+            const buttonGroup = document.getElementById("button-group");
+            buttonGroup.classList.add("hidden");
+
+            // เปลี่ยนสีพื้นหลังเล็กน้อยให้ดูอบอุ่นขึ้น
+            document.body.style.backgroundColor = "#ffcdd2";
+        }
+
+        // คีย์บอร์ดสนับสนุน: Enter = Yes, ArrowLeft/ArrowRight สลับปุ่ม
+        document.addEventListener('keydown', (e) => {
+            const yes = document.getElementById('yesBtn');
+            const no = document.getElementById('noBtn');
+            if (!yes || !no) return;
+            if (e.key === 'Enter') {
+                yes.click();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                // สร้างเอฟเฟกต์เล็กๆ แทนการ hover
+                yes.classList.toggle('focused');
+                no.classList.toggle('focused');
+            }
+        });
+    </script>
+
+</body>
+</html>
